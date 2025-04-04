@@ -8,6 +8,7 @@ from selenium import webdriver
 from fake_useragent import UserAgent
 from requests.cookies import RequestsCookieJar
 from urllib.parse import urlparse
+
 def random_data():
     random_payload = [
         {
