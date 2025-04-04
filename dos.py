@@ -494,5 +494,5 @@ if __name__ == '__main__':
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
     parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL', required=True)
     args = parser.parse_args()
-    get_cookie_windows(str(args.url)) if os.name == 'nt' else get_cookie_linux(str(args.url))
+    get_cookie_windows(str(args.url)) if os.name == 'nt' else get_cookies_linux(str(args.url))
     threading.Thread(target=Runner.start()).start()
