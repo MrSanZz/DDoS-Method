@@ -374,6 +374,6 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--time',type=str, help='DDoS Duration', metavar='45', default=45)
     parser.add_argument('-p', '--proxy', type=str, help='Proxy addrress', metavar='proxy.txt')
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
-    parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX', required=True)
+    parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO', required=True)
     args = parser.parse_args()
     threading.Thread(target=Runner.start()).start()
