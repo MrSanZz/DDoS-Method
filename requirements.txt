@@ -1,0 +1,7 @@
+fake_useragent
+undetected_chromedriver
+httpx
+cloudscraper
+pysocks
+socks
+argparse
