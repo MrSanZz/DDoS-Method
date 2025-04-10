@@ -660,7 +660,7 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--url', type=str, help='Target URL', required=True, metavar='https://example.com')
     parser.add_argument('-th', '--thread', type=str, help='Threader', metavar='20000', default=20000)
     parser.add_argument('-t', '--time',type=str, help='DDoS Duration', metavar='45', default=45)
-    parser.add_argument('-p', '--proxy', type=str, help='Proxy addrress', metavar='proxy.txt')
+    parser.add_argument('-p', '--proxy', type=str, help='Proxy address', metavar='proxy.txt')
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
     parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL, PXSOC, PXHOSHINO', required=True)
     args = parser.parse_args()
