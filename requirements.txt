@@ -5,3 +5,5 @@ cloudscraper
 pysocks
 socks
 argparse
+Crypto
+PyCryptoDome
