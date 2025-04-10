@@ -656,7 +656,7 @@ class Runner:
             exec(f'executor.submit(Method.{str(args.method).upper()}("{args.url}", {args.thread}, {args.time}, "{args.proxy}").start())') if 'PX' in str(args.method).upper() else exec(f'executor.submit(Method.{str(args.method).upper()}("{args.url}", {args.thread}, {args.time}).start())')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=f'Usage: python {__file__} [OPTIONS]')
+    parser = argparse.ArgumentParser(description=f'Usage: python3 {__file__} [OPTIONS]')
     parser.add_argument('-u', '--url', type=str, help='Target URL', required=True, metavar='https://example.com')
     parser.add_argument('-th', '--thread', type=str, help='Threader', metavar='20000', default=20000)
     parser.add_argument('-t', '--time',type=str, help='DDoS Duration', metavar='45', default=45)
