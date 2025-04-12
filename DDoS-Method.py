@@ -755,6 +755,8 @@ class Method:
                             'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         }, headers=headers, timeout=30) as scrape:
                         scrape.get()
+                        for _ in range(200):
+                            scrape.get()
                 except:
                     pass
 
