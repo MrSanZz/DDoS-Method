@@ -779,9 +779,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if 'PX' in args.method:
         if args.proxy and exists(args.proxy):
-            threading.Thread(target=Runner.start()).start()
+            pass
         else:
             print(f"[Error] No file or directory: '{args.proxy}'")
             exit(1)
-    else:
-        threading.Thread(target=Runner.start()).start()
+    threading.Thread(target=Runner.start()).start()
